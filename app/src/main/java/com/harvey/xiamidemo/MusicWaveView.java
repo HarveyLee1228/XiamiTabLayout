@@ -11,6 +11,10 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
+
 /**
  * <pre>
  *     author : Harvey
@@ -39,14 +43,12 @@ public class MusicWaveView extends View {
     private float mAmplitude;//振幅
 
     private static final int PERIOD = 10;
-
     private double mPhase; // 相位
-
-    private static final float MOVE_DISTACE = 5f;
-
     private float divider = 4f;
 
-    private MoveThread mMoveThread;
+
+    private Timer timer;
+    private TimerTask task;
 
     public MusicWaveView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -88,7 +90,7 @@ public class MusicWaveView extends View {
         mAmplitude = mDrawHeight / divider;
     }
 
-    public void setAmplitudeDiv(float div){
+    public void setAmplitudeDiv(float div) {
         this.divider = div;
         invalidate();
     }
@@ -156,61 +158,5 @@ public class MusicWaveView extends View {
         canvas.translate(mCenterPointX, mCenterPointY);
         drawSine(canvas, mPath, mPaint, PERIOD, mDrawWidth, mAmplitude, mPhase);
     }
-
-    private class MoveThread extends Thread {
-        private static final int MOVE_STOP = 1;
-
-        private static final int MOVE_START = 0;
-
-        private int state;
-
-        @Override
-        public void run() {
-            mPhase = 0;
-            state = MOVE_START;
-            while (true) {
-                if (state == MOVE_STOP) {
-                    break;
-                }
-                try {
-                    sleep(30);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-                mPhase -= MOVE_DISTACE;
-                postInvalidate();
-            }
-        }
-
-        public void stopRunning() {
-            state = MOVE_STOP;
-        }
-    }
-
-    /*
-     * API
-     */
-
-    // start volume animation
-    public void start() {
-        mPhase = 0;
-        invalidate();
-        if (mMoveThread != null) {
-            mMoveThread.stopRunning();
-            mMoveThread = null;
-        }
-        mMoveThread = new MoveThread();
-        mMoveThread.start();
-    }
-
-    // stop volume animation
-    public void stop() {
-        if (mMoveThread != null) {
-            mMoveThread.stopRunning();
-            mMoveThread = null;
-        }
-        postInvalidate();
-    }
-
 }
 
