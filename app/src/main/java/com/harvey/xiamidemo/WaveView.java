@@ -1,29 +1,28 @@
 package com.harvey.xiamidemo;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.WindowManager;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Handler;
+import java.util.Random;
 
 /**
  * <pre>
  *     author : Harvey
- *     time   : 2018/05/16
+ *     time   : 2018/05/17
  *     desc   :
  * </pre>
  */
-public class MusicWaveView extends View {
-
+public class WaveView extends View {
     private Paint mPaint;
 
     private Path mPath;
@@ -36,21 +35,13 @@ public class MusicWaveView extends View {
 
     private float mViewWidth;
 
-    private float mCenterPointX;
+    private int div;
 
-    private float mCenterPointY;
+    private float amplitude[];
+    private float waveWidth;
+    private float waveStart, waveEnd;
 
-    private float mAmplitude;//振幅
-
-    private static final int PERIOD = 10;
-    private double mPhase; // 相位
-    private float divider = 4f;
-
-
-    private Timer timer;
-    private TimerTask task;
-
-    public MusicWaveView(Context context, AttributeSet attrs) {
+    public WaveView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
@@ -60,9 +51,11 @@ public class MusicWaveView extends View {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
-        mPaint.setStrokeWidth(1);
+        mPaint.setStrokeWidth(1.5f);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.parseColor("#f58822"));
+        CornerPathEffect cornerPathEffect = new CornerPathEffect(300);
+        mPaint.setPathEffect(cornerPathEffect);
     }
 
     @Override
@@ -75,6 +68,15 @@ public class MusicWaveView extends View {
         initOthers();
     }
 
+    public void setWaveWidth(float waveWidth, boolean isMax) {
+        this.waveWidth = waveWidth;
+        if (isMax)
+            div = 2;
+        else
+            div = 4;
+        invalidate();
+    }
+
     private void initOthers() {
         int paddingLeft = getPaddingLeft();
         int paddingRight = getPaddingRight();
@@ -84,15 +86,19 @@ public class MusicWaveView extends View {
         mDrawWidth = mViewWidth - paddingLeft - paddingRight;
         mDrawHeight = mViewHeight - paddingTop - paddingBottom;
 
-        mCenterPointX = paddingLeft + mDrawWidth / 2f;
-        mCenterPointY = paddingTop + mDrawHeight / 2f;
+        waveStart = (mDrawWidth - waveWidth) / 2;
+        waveEnd = waveStart + waveWidth;
 
-        mAmplitude = mDrawHeight / divider;
-    }
+        float mAmplitude = mDrawHeight / div;
 
-    public void setAmplitudeDiv(float div) {
-        this.divider = div;
-        invalidate();
+        amplitude = new float[20];
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            if (i % 2 == 0)
+                amplitude[i] = mDrawHeight / 2 + (random.nextFloat() + 0.3f) * mAmplitude;
+            else
+                amplitude[i] = mDrawHeight / 2 - (random.nextFloat() + 0.3f) * mAmplitude;
+        }
     }
 
     private int measureWidth(int spec) {
@@ -131,32 +137,30 @@ public class MusicWaveView extends View {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, dm);
     }
 
-    private double sine(float x, int period, float drawWidth, double phase) {
-        return Math.sin(2 * Math.PI * period * (x + phase) / drawWidth);
-    }
-
-    private void drawSine(Canvas canvas, Path path, Paint paint, int period,
-                          float drawWidth, float amplitude, double phase) {
-        float halfDrawWidth = drawWidth / 2f;
-        path.reset();
-        path.moveTo(-halfDrawWidth, 0);
-        float y;
-        double scaling;
-        for (float x = -halfDrawWidth; x <= halfDrawWidth; x++) {
-            scaling = 1 - Math.pow(x / halfDrawWidth, 2);// 对y进行缩放
-            y = (float) (sine(x, period, drawWidth, phase) * amplitude * (1) * Math
-                    .pow(scaling, 3));
-            path.lineTo(x, y);
+    @Override
+    protected void onDraw(Canvas canvas) {
+        mPath.reset();
+        mPath.moveTo(0, mDrawHeight / 2);
+        mPath.lineTo(waveStart, mDrawHeight / 2);
+        //使前端直线慢慢过渡，不要太平滑
+        for (int i = 0; i < 6; i++) {
+            if (amplitude[0] > 0)
+                mPath.lineTo(waveStart, mDrawHeight / 2 + i * 2);
+            else
+                mPath.lineTo(waveStart, mDrawHeight / 2 - i * 2);
         }
-        canvas.drawPath(path, paint);
+
+        for (int i = 0; i < amplitude.length; i++) {
+            mPath.lineTo(waveStart + i * waveWidth / 20, amplitude[i]);
+        }
+        mPath.lineTo(waveEnd, mDrawHeight / 2);
+        //使尾端直线慢慢过渡，不要太平滑
+        for (int i = 0; i < 6; i++) {
+            mPath.lineTo(waveEnd + i * 2, mDrawHeight / 2);
+        }
+        mPath.lineTo(mDrawWidth, mDrawHeight / 2);
+        canvas.drawPath(mPath, mPaint);
         canvas.save();
         canvas.restore();
     }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.translate(mCenterPointX, mCenterPointY);
-        drawSine(canvas, mPath, mPaint, PERIOD, mDrawWidth, mAmplitude, mPhase);
-    }
 }
-

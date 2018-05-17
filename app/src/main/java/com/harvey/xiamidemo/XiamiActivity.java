@@ -42,10 +42,10 @@ public class XiamiActivity extends AppCompatActivity {
             if (i == 0) {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(true);//第一个tab被选中
                 ((AppCompatTextView) tab.getCustomView().findViewById(R.id.tab_text)).setWidth(textMaxWidth);
-                ((MusicWaveView) tab.getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(2f);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
             } else {
                 ((AppCompatTextView) tab.getCustomView().findViewById(R.id.tab_text)).setWidth(textMinWidth);
-                ((MusicWaveView) tab.getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(4f);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
             }
         }
         viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -74,8 +74,8 @@ public class XiamiActivity extends AppCompatActivity {
                             .setWidth(width);
                     ((AppCompatTextView) (tablayout.getTabAt(enterPosition).getCustomView().findViewById(R.id.tab_text)))
                             .setWidth((int) (textMinWidth + (textMaxWidth - textMinWidth) * percent));
-                    ((MusicWaveView) tablayout.getTabAt(enterPosition).getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(2f);
-                    ((MusicWaveView) tablayout.getTabAt(leavePosition).getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(4f);
+                    ((WaveView) tablayout.getTabAt(enterPosition).getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
+                    ((WaveView) tablayout.getTabAt(leavePosition).getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
                 }
 
                 mLastPositionOffsetSum = currentPositionOffsetSum;
@@ -100,14 +100,14 @@ public class XiamiActivity extends AppCompatActivity {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(true);
                 viewpager.setCurrentItem(tab.getPosition());
                 ((AppCompatTextView) (tab.getCustomView().findViewById(R.id.tab_text))).setWidth(textMaxWidth);
-                ((MusicWaveView) tab.getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(2f);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(false);
                 ((AppCompatTextView) (tab.getCustomView().findViewById(R.id.tab_text))).setWidth(textMinWidth);
-                ((MusicWaveView) tab.getCustomView().findViewById(R.id.wave)).setAmplitudeDiv(4f);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
             }
 
             @Override
