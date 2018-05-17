@@ -49,7 +49,7 @@ public class WaveView extends View {
         mPaint.setDither(true);
         mPaint.setStrokeWidth(1.5f);
         mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.parseColor("#f58822"));
+        mPaint.setColor(Color.parseColor("#f7422d"));
         CornerPathEffect cornerPathEffect = new CornerPathEffect(300);
         mPaint.setPathEffect(cornerPathEffect);
     }
@@ -71,6 +71,8 @@ public class WaveView extends View {
     public void setWaveWidth(float waveWidth, boolean isMax) {
         this.waveWidth = waveWidth;
         this.isMax = isMax;
+        waveStart = (mDrawWidth - waveWidth) / 2;
+        waveEnd = waveStart + waveWidth;
         invalidate();
     }
 

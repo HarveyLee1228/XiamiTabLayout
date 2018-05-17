@@ -15,7 +15,7 @@
         android:maxLines="1"
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
-        android:textColor="#f58822"
+        android:textColor="#f7422d"
         app:autoSizeMinTextSize="14sp"
         android:autoSizeMaxTextSize="28sp"
         app:autoSizeTextType="uniform" />
