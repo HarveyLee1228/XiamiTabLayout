@@ -10,6 +10,7 @@ import android.graphics.Path;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -31,15 +32,10 @@ public class WaveView extends View {
 
     private float mDrawWidth;
 
-    private float mViewHeight;
-
-    private float mViewWidth;
-
-    private int div;
-
     private float amplitude[];
     private float waveWidth;
     private float waveStart, waveEnd;
+    private boolean isMax = true;
 
     public WaveView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -63,34 +59,25 @@ public class WaveView extends View {
         widthMeasureSpec = measureWidth(widthMeasureSpec);
         heightMeasureSpec = measureHeight(heightMeasureSpec);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mViewWidth = getMeasuredWidth();
-        mViewHeight = getMeasuredHeight();
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+        mDrawWidth = getMeasuredWidth() - paddingLeft - paddingRight;
+        mDrawHeight = getMeasuredHeight() - paddingTop - paddingBottom;
         initOthers();
     }
 
     public void setWaveWidth(float waveWidth, boolean isMax) {
         this.waveWidth = waveWidth;
-        if (isMax)
-            div = 2;
-        else
-            div = 4;
+        this.isMax = isMax;
         invalidate();
     }
 
     private void initOthers() {
-        int paddingLeft = getPaddingLeft();
-        int paddingRight = getPaddingRight();
-        int paddingTop = getPaddingTop();
-        int paddingBottom = getPaddingBottom();
-
-        mDrawWidth = mViewWidth - paddingLeft - paddingRight;
-        mDrawHeight = mViewHeight - paddingTop - paddingBottom;
-
         waveStart = (mDrawWidth - waveWidth) / 2;
         waveEnd = waveStart + waveWidth;
-
-        float mAmplitude = mDrawHeight / div;
-
+        float mAmplitude = isMax ? mDrawHeight / 2 : mDrawHeight / 4;
         amplitude = new float[20];
         Random random = new Random();
         for (int i = 0; i < 20; i++) {
@@ -158,9 +145,7 @@ public class WaveView extends View {
         for (int i = 0; i < 6; i++) {
             mPath.lineTo(waveEnd + i * 2, mDrawHeight / 2);
         }
-        mPath.lineTo(mDrawWidth, mDrawHeight / 2);
+        mPath.lineTo(mDrawWidth + 40, mDrawHeight / 2);
         canvas.drawPath(mPath, mPaint);
-        canvas.save();
-        canvas.restore();
     }
 }

@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.widget.TextView;
 
 public class XiamiActivity extends AppCompatActivity {
@@ -42,10 +44,10 @@ public class XiamiActivity extends AppCompatActivity {
             if (i == 0) {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(true);//第一个tab被选中
                 ((AppCompatTextView) tab.getCustomView().findViewById(R.id.tab_text)).setWidth(textMaxWidth);
-                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth, true);
             } else {
                 ((AppCompatTextView) tab.getCustomView().findViewById(R.id.tab_text)).setWidth(textMinWidth);
-                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth, false);
             }
         }
         viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -68,14 +70,16 @@ public class XiamiActivity extends AppCompatActivity {
                     leavePosition = position + 1;
                     percent = 1 - positionOffset;
                 }
+                Log.d("ViewPager", "onPageScrolled————>"
+                        + "    进入页面：" + enterPosition
+                        + "    离开页面：" + leavePosition
+                        + "    滑动百分比：" + percent);
                 if (!isClickTab) {
                     int width = (int) (textMinWidth + (textMaxWidth - textMinWidth) * (1 - percent));
                     ((AppCompatTextView) (tablayout.getTabAt(leavePosition).getCustomView().findViewById(R.id.tab_text)))
                             .setWidth(width);
                     ((AppCompatTextView) (tablayout.getTabAt(enterPosition).getCustomView().findViewById(R.id.tab_text)))
                             .setWidth((int) (textMinWidth + (textMaxWidth - textMinWidth) * percent));
-                    ((WaveView) tablayout.getTabAt(enterPosition).getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
-                    ((WaveView) tablayout.getTabAt(leavePosition).getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
                 }
 
                 mLastPositionOffsetSum = currentPositionOffsetSum;
@@ -83,6 +87,16 @@ public class XiamiActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                for (int i = 0; i < 4; i++) {
+                    TabLayout.Tab tab = tablayout.getTabAt(i);
+                    assert tab != null;
+                    if (i == position)
+                        ((WaveView) tab.getCustomView().findViewById(R.id.wave))
+                                .setWaveWidth(textMaxWidth, true);
+                    else
+                        ((WaveView) tab.getCustomView().findViewById(R.id.wave))
+                                .setWaveWidth(textMinWidth, false);
+                }
 
             }
 
@@ -100,14 +114,14 @@ public class XiamiActivity extends AppCompatActivity {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(true);
                 viewpager.setCurrentItem(tab.getPosition());
                 ((AppCompatTextView) (tab.getCustomView().findViewById(R.id.tab_text))).setWidth(textMaxWidth);
-                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth,true);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMaxWidth, true);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 tab.getCustomView().findViewById(R.id.tab_text).setSelected(false);
                 ((AppCompatTextView) (tab.getCustomView().findViewById(R.id.tab_text))).setWidth(textMinWidth);
-                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth,false);
+                ((WaveView) tab.getCustomView().findViewById(R.id.wave)).setWaveWidth(textMinWidth, false);
             }
 
             @Override
@@ -119,13 +133,14 @@ public class XiamiActivity extends AppCompatActivity {
     }
 
     private void initSize() {
-        Resources resources = this.getResources();
-        DisplayMetrics dm = resources.getDisplayMetrics();
-        int width = dm.widthPixels;
-        textMaxWidth = width / 4 - 40;
         TextView tv = new TextView(this);
+        tv.setTextSize(14);
         TextPaint textPaint = tv.getPaint();
         textMinWidth = (int) textPaint.measureText("乐库");
+        tv = new TextView(this);
+        tv.setTextSize(28);
+        textPaint = tv.getPaint();
+        textMaxWidth = (int) textPaint.measureText("乐库");
     }
 }
 
